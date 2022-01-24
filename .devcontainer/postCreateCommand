@@ -1,0 +1,18 @@
+#!/bin/bash
+#
+# After creating container, run this to set up environment inside container.
+#
+
+# Copy your own .bashrc to home dir in the container.
+if [ -f .devcontainer/.bashrc ]; then
+    cp .devcontainer/.bashrc ~/
+fi
+
+# aview
+sudo ln -s $(pwd)/bin/aview /usr/local/bin/
+
+# # PlantUML
+# sudo ln -s $(pwd)/.devcontainer/plantuml /usr/local/bin/
+
+# # poetry
+# poetry install
