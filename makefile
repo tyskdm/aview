@@ -24,8 +24,8 @@ clean: db-clean
 #
 
 db:
-	@mkdir $(ASDBDIR)/17-10
-	@mkdir $(ASDBDIR)/19-03
+	@mkdir -p $(ASDBDIR)/17-10
+	@mkdir -p $(ASDBDIR)/19-03
 
 	@pdftotext -f 18 -l 300 \
 		$(ASDBDIR)/pdf/17-10/AUTOSAR_RS_CPP14Guidelines.pdf \

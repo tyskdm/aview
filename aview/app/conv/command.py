@@ -498,7 +498,7 @@ def concatenate_lines(textdata):
                     continue # without increment
 
                 # A\d{1,3}-\d{1,3}-\d{1,3}\.(cpp|hpp)
-                if re.search(r"A\d{1,3}-\d{1,3}-\d{1,3}\.(cpp|hpp)[^\"]", lines[i]) is None:
+                if re.search(r"(A|M)\d{1,3}-\d{1,3}-\d{1,3}\.(cpp|hpp)[^\"]", lines[i]) is None:
                     del lines[i]
                     continue # without increment
 
