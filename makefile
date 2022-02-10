@@ -11,8 +11,6 @@ DOXYXMLDIR  := xml
 PYTESTDIR   := htmlcov
 ASDBDIR 	:= database
 
-.PHONY: all clean doc doc-clean puml-img puml-clean test test-cov spec-cov spec-clean
-
 all: clean db
 
 # clean: db-clean puml-clean doc-clean spec-clean 
@@ -24,35 +22,39 @@ clean: db-clean
 #
 
 db:
-	@mkdir -p $(ASDBDIR)/17-10
-	@mkdir -p $(ASDBDIR)/19-03
+	@mkdir -p $(ASDBDIR)/A1710
+	@mkdir -p $(ASDBDIR)/A1903
 
 	@pdftotext -f 18 -l 300 \
-		$(ASDBDIR)/pdf/17-10/AUTOSAR_RS_CPP14Guidelines.pdf \
-		$(ASDBDIR)/17-10/AUTOSAR_RS_CPP14Guidelines.txt
-	@aview conv -i $(ASDBDIR)/17-10/AUTOSAR_RS_CPP14Guidelines.txt \
-		> $(ASDBDIR)/17-10/[17-10]_C++14_Coding_Rules.txt
+		$(ASDBDIR)/pdf/A1710/AUTOSAR_RS_CPP14Guidelines.pdf \
+		$(ASDBDIR)/A1710/AUTOSAR_RS_CPP14Guidelines.txt
+	@aview conv -i $(ASDBDIR)/A1710/AUTOSAR_RS_CPP14Guidelines.txt -t text \
+		> $(ASDBDIR)/A1710/[17-10]_C++14_Coding_Rules.txt
+	@aview conv -i $(ASDBDIR)/A1710/AUTOSAR_RS_CPP14Guidelines.txt -t json \
+		> $(ASDBDIR)/A1710/[17-10]_C++14_Coding_Rules.json
 
 	@pdftotext -f 21 -l 386 \
-		$(ASDBDIR)/pdf/19-03/AUTOSAR_RS_CPP14Guidelines.pdf \
-		$(ASDBDIR)/19-03/AUTOSAR_RS_CPP14Guidelines.txt
-	@aview conv -i $(ASDBDIR)/19-03/AUTOSAR_RS_CPP14Guidelines.txt \
-		> $(ASDBDIR)/19-03/[19-03]_C++14_Coding_Rules.txt
+		$(ASDBDIR)/pdf/A1903/AUTOSAR_RS_CPP14Guidelines.pdf \
+		$(ASDBDIR)/A1903/AUTOSAR_RS_CPP14Guidelines.txt
+	@aview conv -i $(ASDBDIR)/A1903/AUTOSAR_RS_CPP14Guidelines.txt -t text \
+		> $(ASDBDIR)/A1903/[19-03]_C++14_Coding_Rules.txt
+	@aview conv -i $(ASDBDIR)/A1903/AUTOSAR_RS_CPP14Guidelines.txt -t json \
+		> $(ASDBDIR)/A1903/[19-03]_C++14_Coding_Rules.json
 
 db-clean:
-	@$(RM) -rf $(ASDBDIR)/17-10
-	@$(RM) -rf $(ASDBDIR)/19-03
+	@$(RM) -rf $(ASDBDIR)/A1710
+	@$(RM) -rf $(ASDBDIR)/A1903
 
-db-install:
-	@mkdir -p $(ASDBDIR)/pdf/17-10
+pdf-install:
+	@mkdir -p $(ASDBDIR)/pdf/A1710
 	curl https://www.autosar.org/fileadmin/user_upload/standards/adaptive/17-10/AUTOSAR_RS_CPP14Guidelines.pdf \
-		-o $(ASDBDIR)/pdf/17-10/AUTOSAR_RS_CPP14Guidelines.pdf
-	@mkdir -p $(ASDBDIR)/pdf/19-03
+		-o $(ASDBDIR)/pdf/A1710/AUTOSAR_RS_CPP14Guidelines.pdf
+	@mkdir -p $(ASDBDIR)/pdf/A1903
 	curl https://www.autosar.org/fileadmin/user_upload/standards/adaptive/21-11/AUTOSAR_RS_CPP14Guidelines.pdf \
-		-o $(ASDBDIR)/pdf/19-03/AUTOSAR_RS_CPP14Guidelines.pdf
+		-o $(ASDBDIR)/pdf/A1903/AUTOSAR_RS_CPP14Guidelines.pdf
 
-db-remove:
-	@$(RM) -rf $(ASDBDIR)
+pdf-remove:
+	@$(RM) -rf $(ASDBDIR)/pdf
 
 #
 # Doxygen
@@ -106,3 +108,5 @@ spec-cov:
 
 spec-clean:
 	@$(RM) -rf $(PYTESTDIR)
+
+.PHONY: all clean doc doc-clean puml-img puml-clean test test-cov spec-cov spec-clean pdf-install pdf-remove
