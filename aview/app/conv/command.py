@@ -3,8 +3,10 @@ command.py
 """
 import re
 import sys
+import json
 
 from . import format_text
+from . import create_json
 
 def setup(subparsers, name, commonOptions):
     """
@@ -13,9 +15,14 @@ def setup(subparsers, name, commonOptions):
     global __subcommand__
     __subcommand__ = name
 
-    parser = subparsers.add_parser(__subcommand__, parents=[commonOptions], help='Converts AUTOSAR text file to json data file')
+    parser = subparsers.add_parser(__subcommand__, parents=[commonOptions],
+                                   help='Converts AUTOSAR text file to json data file')
     parser.set_defaults(func=run)
-    parser.add_argument('-i', '--inputfile', help='path to the exported text file.')
+    parser.add_argument('-i', '--inputfile',
+                        help='path to the input text file(exported from original pdf).')
+    parser.add_argument('-t', '--type',
+                        help='type convert to. text=formatted text, or json=rule data objects.',
+                        type=str, choices=['text', 'json'], default='text')
 
 
 def run(args):
@@ -57,5 +64,12 @@ def run(args):
     else:
         textdata = texttype + " is not supported."
 
-    print(textdata)
+    if args.type == 'text':
+        print(textdata)
+        exit(0)
 
+    #
+    # Creating the rule object
+    #
+    data = create_json.create_object(textdata)
+    print(json.dumps(data, indent=4))
