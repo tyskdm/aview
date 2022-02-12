@@ -1,0 +1,25 @@
+' # create_json.puml
+'
+@startuml parsing_text
+
+hide empty description
+
+[*] --> Section : None
+state "<b>Section</b>\non_entry(e): Store the breadcrumb." as Section {
+    [*] --> rule
+    rule <-- rule : RuleHeader
+    state "<b>Rule</b>\non_entry(e): Create a rule object." as rule {
+        [*] --> get_prop
+        get_prop <-- get_prop : ( Rationale | Exception |\n        Example | See also )
+        state "<b>Get properties</b>\non_entry(e): Set prop name." as get_prop {
+            [*] --> append_line
+            append_line <-- append_line : Normal lines
+            state "Append a line" as append_line
+        }
+    }
+}
+
+Section <-- Section : SectionHeader
+
+@enduml
+
