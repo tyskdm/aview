@@ -16,7 +16,7 @@ def setup(subparsers, name, commonOptions):
     __subcommand__ = name
 
     parser = subparsers.add_parser(__subcommand__, parents=[commonOptions],
-                                   help='Converts AUTOSAR text file to json data file')
+                                   help='Display rules with the difference information.')
     parser.set_defaults(func=run)
     parser.add_argument('-i', '--inputfile',
                         help='path to the input text file(exported from original pdf).')
