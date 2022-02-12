@@ -76,12 +76,12 @@ class Rule(fsm.State):
                              r"\((.+)\)<br>(.*)$", line)
             if match:
                 self.rule_data = {
-                    "section": e[-1][:],
-                    "class": [x.strip() for x in match.group(2).split(',')],
-                    "rule": match.group(3)
+                    "Section": e[-1][:],
+                    "Class": [x.strip() for x in match.group(2).split(',')],
+                    "Rule": match.group(3)
                 }
                 data[match.group(1)] = self.rule_data
-                self.prop_name = "note"
+                self.prop_name = "Note"
                 self.inside_rule = True
 
         return super().on_entry(e)
