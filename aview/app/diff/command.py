@@ -165,6 +165,15 @@ def compare_rule(a, b, opts, all = False):
         if diff:
             diffs += (["\nSection:"] + diff)
 
+    if "Class" in all_keys and opts["classifier"]:
+        diff = _diff_lines(
+            a["Class"] if "Class" in a.keys() else [],
+            b["Class"] if "Class" in b.keys() else [],
+            all=all
+        )
+        if diff:
+            diffs += (["\nClass:"] + diff)
+
     if "Rule" in all_keys and opts["text"]:
         diff = _diff_lines(
             [a["Rule"]] if "Rule" in a.keys() else [],
