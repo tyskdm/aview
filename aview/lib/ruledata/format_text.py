@@ -1,6 +1,7 @@
 """
 format_text.py
 """
+from cgitb import text
 import re
 
 def format_17_10(textdata) -> str:
@@ -414,6 +415,286 @@ def format_19_03(textdata) -> str:
 
     return textdata
 
+def format_2008(textdata) -> str:
+
+    _TOC_ =[
+        ["6",      "Rules"],
+        ["6.0",    "Language independent issues"],
+        ["6.0.1",  "Unnecessary constructs"],
+        ["6.0.2",  "Storage"],
+        ["6.0.3",  "Runtime failures"],
+        ["6.0.4",  "Arithmetic"],
+        ["6.1",    "General"],
+        ["6.1.0",  "Language"],
+        ["6.2",    "Lexical conventions"],
+        ["6.2.2",  "Character sets"],
+        ["6.2.3",  "Trigraph sequences"],
+        ["6.2.5",  "Alternative tokens"],
+        ["6.2.7",  "Comments"],
+        ["6.2.10", "Identifiers"],
+        ["6.2.13", "Literals"],
+        ["6.3",    "Basic concepts"],
+        ["6.3.1",  "Declarations and definitions"],
+        ["6.3.2",  "One Definition Rule"],
+        ["6.3.3",  "Declarative regions and scope"],
+        ["6.3.4",  "Name lookup"],
+        ["6.3.9",  "Types"],
+        ["6.4",    "Standard conversions"],
+        ["6.4.5",  "Integral promotions"],
+        ["6.4.10", "Pointer conversions"],
+        ["6.5",    "Expressions"],
+        ["6.5.0",  "General"],
+        ["6.5.2",  "Postfix expressions"],
+        ["6.5.3",  "Unary expressions"],
+        ["6.5.8",  "Shift operators"],
+        ["6.5.14", "Logical AND operator"],
+        ["6.5.17", "Assignment operators"],
+        ["6.5.18", "Comma operator"],
+        ["6.5.19", "Constant expressions"],
+        ["6.6",    "Statements"],
+        ["6.6.2",  "Expression statement"],
+        ["6.6.3",  "Compound statement"],
+        ["6.6.4",  "Selection statements"],
+        ["6.6.5",  "Iteration statements"],
+        ["6.6.6",  "Jump statements"],
+        ["6.7",    "Declarations"],
+        ["6.7.1",  "Specifiers"],
+        ["6.7.2",  "Enumeration declarations"],
+        ["6.7.3",  "Namespaces"],
+        ["6.7.4",  "The asm declaration"],
+        ["6.7.5",  "Linkage specifications"],
+        ["6.8",    "Declarators"],
+        ["6.8.0",  "General"],
+        ["6.8.3",  "Meaning of declarators"],
+        ["6.8.4",  "Function definitions"],
+        ["6.8.5",  "Initializers"],
+        ["6.9",    "Classes"],
+        ["6.9.3",  "Member functions"],
+        ["6.9.5",  "Unions"],
+        ["6.9.6",  "Bit-fields"],
+        ["6.10",   "Derived classes"],
+        ["6.10.1", "Multiple base classes"],
+        ["6.10.2", "Member name lookup"],
+        ["6.10.3", "Virtual functions"],
+        ["6.11",   "Member access control"],
+        ["6.11.0", "General"],
+        ["6.12",   "Special member functions"],
+        ["6.12.1", "Constructors"],
+        ["6.12.8", "Copying class objects"],
+        ["6.14",   "Templates"],
+        ["6.14.5", "Template declarations"],
+        ["6.14.6", "Name resolution"],
+        ["6.14.7", "Template instantiation and specialization"],
+        ["6.14.8", "Function template specialization"],
+        ["6.15",   "Exception handling"],
+        ["6.15.0", "General"],
+        ["6.15.1", "Throwing an exception"],
+        ["6.15.3", "Handling an exception"],
+        ["6.15.4", "Exception specifications"],
+        ["6.15.5", "Special functions"],
+        ["6.16",   "Preprocessing directives"],
+        ["6.16.0", "General"],
+        ["6.16.1", "Conditional inclusion"],
+        ["6.16.2", "Source file inclusion"],
+        ["6.16.3", "Macro replacement"],
+        ["6.16.6", "Pragma directive"],
+        ["6.17",   "Library introduction"],
+        ["6.17.0", "General"],
+        ["6.18",   "Language support library"],
+        ["6.18.0", "General"],
+        ["6.18.2", "Implementation properties"],
+        ["6.18.4", "Dynamic memory management"],
+        ["6.18.7", "Other runtime support"],
+        ["6.19",   "Diagnostics library"],
+        ["6.19.3", "Error numbers"],
+        ["6.27",   "Input/output library"],
+        ["6.27.0", "General"]
+    ]
+
+    # Remove page num, footer and header - step#1
+    textdata = re.sub(r"^\n\d{1,3}\n((\n.*?){0,10})\nLicensed to: .*?\n.*?\n\n\f.*?\n",
+                      r"\1", textdata, flags=re.MULTILINE)
+
+    # Remove page num, footer and header - step#2
+    textdata = re.sub(r"^\n\d{1,3}\n((\n.*?){0,16})\nLicensed to: .*?\n.*?\n\n\f.*?\n",
+                      r"\1", textdata, flags=re.MULTILINE)
+
+    # Remove before chapter 6.
+    i = -1
+    lines = textdata.split('\n')
+    for line in lines:
+        if line == "6. Rules":
+            i = lines.index(line)
+            break
+    textdata = '\n'.join(lines[i:])
+
+    # Remove after chapter 6.
+    textdata = re.sub(r"^7. References(\n.*)+",
+                       "", textdata, flags=re.MULTILINE)
+
+    # Section header
+    lines = textdata.split('\n')
+    line_idx = 0
+    for header in _TOC_:
+        for i in range(line_idx, len(lines)):
+            if lines[i].startswith(header[0]):
+                if lines[i] == header[0]:
+                    j = i + 1
+                    while lines[j] != header[1]:
+                        j += 1
+
+                    lines[j] = (
+                        '\n' + ("#" * len(header[0].split('.'))) + " "
+                        + lines[i] + " " + lines[j] + '\n'
+                    )
+                    del lines[i]
+                    line_idx = j
+                    break
+
+                elif lines[i].endswith(header[1]):
+                    lines[i] = (
+                        '\n' + ("#" * len(header[0].split('.'))) + " "
+                        + lines[i] + '\n'
+                    )
+                    line_idx = i + 1
+                    break
+
+        if i == len(lines):
+            print("TOC '" + header[0] + "' not found.")
+            exit(1)
+
+    textdata = '\n'.join(lines)
+    textdata = re.sub(r"^# 6\. Rules$", "# 6 Rules", textdata, flags=re.MULTILINE)
+    # To align the format with AUTOSAR
+
+    # Rule - Step#1
+    textdata = re.sub(r"–", "-", textdata)
+    textdata = m2008_rule_1(textdata)
+
+    # Part header
+    textdata = re.sub(r"(^(Rationale|Exception|Example|See also)$)",
+                      r"\n##### \1\n", textdata, flags=re.MULTILINE)
+
+    textdata = concatenate_lines(textdata)
+    return textdata
+
+
+def m2008_rule_1(textdata):
+    lines = textdata.split('\n')
+    i = 0
+    while i < len(lines):
+
+        current_ptr = i
+        if re.match(r"^Rule \d{1,2}-\d{1,2}-\d{1,2}$", lines[i]):
+            blocks = [lines[i], ""]
+
+            # if rule is found:
+            # get related lines into blocks
+            i += 1
+            while not (
+                    (lines[i] == "Rationale") or
+                    re.match(r"^#{1,3} 6\.(\d{1,2}\.)?(\d{1,2})? .+$", lines[i]) or     # Header
+                    re.match(r"^Rule \d{1,2}-\d{1,2}-\d{1,2}$", lines[i])               # Next rule
+                ):
+                if lines[i] == "" and blocks[-1] != "":
+                    # Create next block(paragraph)
+                    blocks.append("")
+
+                else:
+                    blocks[-1] += lines[i] if blocks[-1] == "" else '\n' + lines[i]
+
+                i += 1
+
+            if blocks[-1] == "":
+                blocks = blocks[:-1]
+
+            # Parsing blocks if it's not empty
+            #
+            if len(blocks) >= 3:    # There is content
+                                    # 3 = Rule num, classifier, body
+                rule = _m2008_rule_parser(blocks)
+
+                if rule is not None:
+                    lines[current_ptr:i] = rule
+                    current_ptr += len(rule)
+                    i = current_ptr
+                    continue # without incrementing i
+
+                else:
+                    # Ignore the blocks
+                    current_ptr = i
+                    continue
+            else:
+                current_ptr = i
+                continue
+
+        i += 1
+
+    textdata = '\n'.join(lines)
+    return textdata
+
+def _m2008_rule_parser(blocks):
+    rule = [
+        "",             # 0: Text from the previous part that was mixed in
+        blocks[0],      # 1: Rule id
+        "",             # 2: Rule Classifier
+        "",             # 3: Rule body text
+        ""              # 4: Rule Note
+    ]
+
+    # Step#1: Simple case
+    for b in blocks[1:]:
+        if b.startswith("//"):
+            rule[0] += "\n\n" + b   # prev part
+        elif b.startswith("(") and b.endswith(")"):
+            rule[2] = b             # classifier
+        else:
+            if rule[3] == "":
+                rule[3] = b         # rule body
+            else:
+                rule = None         # Can't handle this type of blocks(--> step#2)
+                break
+
+    # Step#2
+    if rule is None:
+        if blocks[0] == "Rule 5-0-18":
+            rule = ["", blocks[0], blocks[1], blocks[2] + " " + blocks[3], ""]
+
+        elif blocks[0] == "Rule 16-2-5":
+            rule = ["", blocks[0], blocks[2], blocks[1] + "\n" + blocks[3], ""]
+
+        elif blocks[0] in ( "Rule 4-5-2", "Rule 5-0-14", "Rule 5-2-3",
+                          "Rule 6-5-5", "Rule 8-4-4", "Rule 9-3-3", "Rule 12-1-2" ):
+
+            rule = ["", blocks[0], "", blocks[-1], ""]
+            for b in blocks[1:-1]:
+                if b.startswith("(") and b.endswith(")"):
+                    rule[2] = b             # classifier
+                else:
+                    rule[0] += "\n\n" + b   # prev part
+
+        elif blocks[0] in ( "Rule 6-4-3", "Rule 16-2-3" ):
+            rule = ["", blocks[0], blocks[1], blocks[2], ""]
+            for b in blocks[3:]:
+                rule[4] += "\n\n" + b       # note
+
+        elif blocks[0] == "Rule 15-0-2":
+            rule = None # Ignore
+
+        else:
+            exit(1)     # Unexpected
+
+    # format the rule
+    if rule is not None:
+        rule = [
+            rule[0],
+            "\n\n#### " + rule[1] + " " + rule[2] + "<br>" +
+            " ".join(rule[3].split('\n')) + "\n",
+            rule[4]
+        ]
+
+    return rule
+
 
 def concatenate_lines(textdata):
 
@@ -446,7 +727,7 @@ def concatenate_lines(textdata):
 
         if lines[i] != "":
             while (
-                    (not lines[i].endswith(".")) and
+                    (not lines[i].endswith((".", ";", ":"))) and
                     (lines[i+1] != "") and
                     (not re.match("^\s*\d+\. ", lines[i+1]))
                 ):
@@ -529,3 +810,4 @@ def remove_reference_num(textdata):
         r"\1 \3", textdata)
 
     return textdata
+

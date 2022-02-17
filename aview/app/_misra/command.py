@@ -5,8 +5,7 @@ import re
 import sys
 import json
 
-from . import format_text
-from . import create_json
+from ...lib import ruledata
 
 def setup(subparsers, name, commonOptions):
     """
@@ -22,8 +21,7 @@ def setup(subparsers, name, commonOptions):
                         help='path to the input text file(exported from original pdf).')
     parser.add_argument('-t', '--type',
                         help='type convert to. text=formatted text, or json=rule data objects.',
-                        type=str, choices=['text', 'json'], default='text')
-
+                        type=str, choices=['text', 'json', 'data'], default='json')
 
 def run(args):
     """
@@ -46,30 +44,31 @@ def run(args):
         print(__subcommand__ + ': error: Missing inputfile ( [-i / --inputfile] is required)')
         sys.exit(1)
 
-    #
-    # Getting the Guidelines version
-    #
-    m = re.search(r"\nAUTOSAR AP Release (\d{2}-\d{2})\n", textdata)
-    texttype = m.group(1)
+    m = re.search(r"^(License terms: .+(\n.+)+)$", textdata, flags=re.MULTILINE)
+    LicenseTerms = m.group(1)
+    LicenseTerms = LicenseTerms.split('\n')
+    for i in range(len(LicenseTerms)):
+        while not LicenseTerms[i].endswith('.'):
+            LicenseTerms[i] += ' ' + LicenseTerms[i+1]
+            del LicenseTerms[i+1]
 
-    #
-    # Formatting the textdata
-    #
-    if texttype == "17-10":
-        textdata = format_text.format_17_10(textdata)
+        if i == len(LicenseTerms) - 1:
+            break
 
-    elif texttype == "19-03":
-        textdata = format_text.format_19_03(textdata)
+    print('\n'.join(LicenseTerms))
 
-    else:
-        textdata = texttype + " is not supported."
+    if args.type == 'data':
+        print(json.dumps(ruledata.get_misra_data(textdata), indent=4))
+        exit(0)
+
+    textdata = ruledata.format_2008(textdata)
 
     if args.type == 'text':
         print(textdata)
         exit(0)
 
-    #
-    # Creating the rule object
-    #
-    data = create_json.create_object(textdata)
-    print(json.dumps(data, indent=4))
+    data = ruledata.create_object(textdata)
+
+    if args.type == 'json':
+        print(json.dumps(data, indent=4))
+        exit(0)

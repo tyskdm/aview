@@ -28,17 +28,17 @@ db:
 	@pdftotext -f 18 -l 300 \
 		$(ASDBDIR)/pdf/A1710/AUTOSAR_RS_CPP14Guidelines.pdf \
 		$(ASDBDIR)/A1710/AUTOSAR_RS_CPP14Guidelines.txt
-	@aview conv -i $(ASDBDIR)/A1710/AUTOSAR_RS_CPP14Guidelines.txt -t text \
+	@aview _autosar -i $(ASDBDIR)/A1710/AUTOSAR_RS_CPP14Guidelines.txt -t text \
 		> $(ASDBDIR)/A1710/[17-10]_C++14_Coding_Rules.txt
-	@aview conv -i $(ASDBDIR)/A1710/AUTOSAR_RS_CPP14Guidelines.txt -t json \
+	@aview _autosar -i $(ASDBDIR)/A1710/AUTOSAR_RS_CPP14Guidelines.txt -t json \
 		> $(ASDBDIR)/A1710/[17-10]_C++14_Coding_Rules.json
 
 	@pdftotext -f 21 -l 386 \
 		$(ASDBDIR)/pdf/A1903/AUTOSAR_RS_CPP14Guidelines.pdf \
 		$(ASDBDIR)/A1903/AUTOSAR_RS_CPP14Guidelines.txt
-	@aview conv -i $(ASDBDIR)/A1903/AUTOSAR_RS_CPP14Guidelines.txt -t text \
+	@aview _autosar -i $(ASDBDIR)/A1903/AUTOSAR_RS_CPP14Guidelines.txt -t text \
 		> $(ASDBDIR)/A1903/[19-03]_C++14_Coding_Rules.txt
-	@aview conv -i $(ASDBDIR)/A1903/AUTOSAR_RS_CPP14Guidelines.txt -t json \
+	@aview _autosar -i $(ASDBDIR)/A1903/AUTOSAR_RS_CPP14Guidelines.txt -t json \
 		> $(ASDBDIR)/A1903/[19-03]_C++14_Coding_Rules.json
 
 db-clean:
