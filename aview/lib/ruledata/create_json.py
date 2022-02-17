@@ -72,7 +72,7 @@ class Rule(fsm.State):
             # #### Rule A2-8-1 (required, implementation, automated)<br>The character \ shall
             # not occur as a last character of a C++ comment.
 
-            match = re.match(r"^#{4} Rule ([M|A]\d{1,2}-\d{1,2}-\d{1,2})\s*" +
+            match = re.match(r"^#{4} Rule ([MA]?\d{1,2}[-–]\d{1,2}[-–]\d{1,2})\s*" +
                              r"\((.+)\)<br>(.*)$", line)
             if match:
                 self.rule_data = {
@@ -95,7 +95,7 @@ class Rule(fsm.State):
         # #### Rule A2-8-1 (required, implementation, automated)<br>The character \ shall
         # not occur as a last character of a C++ comment.
 
-        match = re.match(r"^#{4} Rule ([M|A]\d{1,2}-\d{1,2}-\d{1,2})\s*" +
+        match = re.match(r"^#{4} Rule ([MA]?\d{1,2}[-–]\d{1,2}[-–]\d{1,2})\s*" +
                             r"\((.+)\)<br>(.*)$", line)
         if match:
             next = (self, e)    # Reopen

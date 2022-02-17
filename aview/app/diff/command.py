@@ -4,7 +4,8 @@ command.py
 import difflib
 import json
 import re
-from xml.dom import EMPTY_NAMESPACE
+
+from ...lib import ruledata
 
 def setup(subparsers, name, commonOptions):
     """
@@ -16,11 +17,10 @@ def setup(subparsers, name, commonOptions):
     parser = subparsers.add_parser(__subcommand__, parents=[commonOptions],
                                    help='Converts AUTOSAR text file to json data file')
     parser.set_defaults(func=run)
-    parser.add_argument('id', type=str,
+    parser.add_argument('id', type=str, nargs='*',
                         help='type convert to. text=formatted text, or json=rule data objects.')
-    # parser.add_argument('-t', '--type',
-    #                     help='type convert to. text=formatted text, or json=rule data objects.',
-    #                     type=str, choices=['text', 'json'], default='text')
+    parser.add_argument('-m', '--misra2008',
+                        help='path to the misra2008 pdf file.')
 
     # DATA STRUCTURE
     # [
@@ -64,41 +64,24 @@ def run(args):
     with open(datadir + _A1903_JSON, 'r', encoding='UTF-8') as f:
         a1903 = json.load(f)
 
-    id = args.id
+    if args.misra2008 is not None:
+        m2008 = ruledata.get_misra_data(args.misra2008)
+    else:
+        m2008 = None
+
+    rules = {
+        "1710": a1710,
+        "1903": a1903,
+        "2008": m2008
+    }
+
     opts = _set_opts(args)
 
-    if id != "all":
+    #
+    # diff ALL
+    #
+    if args.id[0] == "all":
 
-        id_all = a1710.keys() | a1903.keys()
-        empty = {
-            "Section" : [],
-            "Class": [],
-            "Rule": "",
-            "Note": [],
-            "Rationale": [],
-            "Exception": [],
-            "Example": [],
-            "See also": [],
-        }
-
-        if id in id_all:
-            diff = compare_rule(
-                a1710[id] if id in a1710.keys() else empty,
-                a1903[id] if id in a1903.keys() else empty,
-                opts, all=True
-            )
-
-            print("## " + id)
-            print("\ndiff: - A17-10 / + A19-03")
-            print("-------------------------")
-            print("Compare : " + ', '.join(opts["_Compare"]))
-            print("Ignore  : " + ', '.join(opts["_Ignore"]))
-            print('\n'.join(diff))
-
-        else:
-            print('Error: ' + id + ' not found.\n')
-
-    else:
         n_total = len(a1710.keys() | a1903.keys())
         n_common = len(a1710.keys() & a1903.keys())
         n_only_in_17 = len((a1710.keys() ^ a1903.keys()) & a1710.keys())
@@ -134,6 +117,114 @@ def run(args):
         print("Ignore  : " + ', '.join(opts["_Ignore"]))
         for item in diff_info:
             print('\n'.join(item))
+
+    #
+    # diff A17-10 and A19-03
+    #
+    elif len(args.id) == 1:
+
+        id = args.id[0].split('@')[0]
+
+        id_all = a1710.keys() | a1903.keys()
+        empty = {
+            "Section" : [],
+            "Class": [],
+            "Rule": "",
+            "Note": [],
+            "Rationale": [],
+            "Exception": [],
+            "Example": [],
+            "See also": [],
+        }
+
+        if id in id_all:
+            diff = compare_rule(
+                a1710[id] if id in a1710.keys() else empty,
+                a1903[id] if id in a1903.keys() else empty,
+                opts, all=True
+            )
+
+            print("## " + id)
+            print("\ndiff: - A17-10 / + A19-03")
+            print("-------------------------")
+            print("Compare : " + ', '.join(opts["_Compare"]))
+            print("Ignore  : " + ', '.join(opts["_Ignore"]))
+            print('\n'.join(diff))
+
+        else:
+            print('Error: ' + id + ' not found.\n')
+
+    #
+    # diff specified ids
+    #
+    else:
+        (ida, idb) = _set_id(args.id)
+
+        if "2008" in (ida[1], idb[1]) and rules["2008"] is None:
+            print(__subcommand__ + ': error: Missing inputfile([-m/--misra2008] is required)')
+
+        if ida[0] not in rules[ida[1]].keys():
+            print('Error: ' + args.id[0] + ' not found.\n')
+            exit(1)
+
+        if idb[0] not in rules[idb[1]].keys():
+            print('Error: ' + args.id[1] + ' not found.\n')
+            exit(1)
+
+        rule_a = rules[ida[1]][ida[0]]
+        rule_b = rules[idb[1]][idb[0]]
+
+        diff = compare_rule(rule_a, rule_b, opts, all=True)
+
+        headline = "\ndiff: - " + ida[0]+"@"+ida[1] + " / + " + idb[0]+"@"+idb[1]
+        print(headline)
+        print("-" * (len(headline) - 1))
+        print("Compare : " + ', '.join(opts["_Compare"]))
+        print("Ignore  : " + ', '.join(opts["_Ignore"]))
+        print('\n'.join(diff))
+
+
+def _set_id(ids):
+
+    ida = ids[0].split('@')
+    ida[0] = ida[0].upper()
+
+    if len(ida) == 1:
+        if ida[0].startswith(('A', 'M')):
+            ida.append('1710')
+        else:
+            ida.append('2008')
+
+    elif ida[1].startswith('17'):
+        ida[1] = '1710'
+    elif ida[1].startswith('19'):
+        ida[1] = '1903'
+    elif ida[1].endswith('08'):
+        ida[1] = '2008'
+    else:
+        print("Invalid id option: " + ids[0])
+        exit(1)
+
+    idb = ids[1].split('@')
+    idb[0] = idb[0].upper()
+
+    if len(idb) == 1:
+        if idb[0].startswith(('A', 'M')):
+            idb.append('1903')
+        else:
+            idb.append('2008')
+
+    elif idb[1].startswith('17'):
+        idb[1] = '1710'
+    elif idb[1].startswith('19'):
+        idb[1] = '1903'
+    elif idb[1].endswith('08'):
+        idb[1] = '2008'
+    else:
+        print("Invalid id option: " + ids[0])
+        exit(1)
+
+    return (ida, idb)
 
 
 # DATA STRUCTURE

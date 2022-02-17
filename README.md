@@ -1,12 +1,26 @@
 # aview
 
-`AUTOSAR C++14 Coding Rules` viewer
+`AUTOSAR C++14` ans `MISRA C++:2008` Guidelines viewer / diff viewer
 
+<br>
+
+- [1. Version and Stability](#1-version-and-stability)
+- [2. Motivation](#2-motivation)
+- [3. Requirements](#3-requirements)
+- [4. Installation](#4-installation)
+- [5. Preparing data](#5-preparing-data)
+- [6. Usage](#6-usage)
+  - [6.1. `diff`](#61-diff)
+  - [6.2. Write your own subcommands](#62-write-your-own-subcommands)
+- [7. Limitation](#7-limitation)
+
+<br>
 
 ## 1. Version and Stability
 
-| Version | Stability |
-| :-----: | :-------: |
+| Version | Stability | Changes |
+| :-----: | :-------: | ------- |
+| 0.7.1   | [Stability: 1 - Experimental](https://nodejs.org/api/documentation.html#documentation_stability_index) | Added MISRA C++:2008 to the list of supported documents.
 | 0.7.0   | [Stability: 1 - Experimental](https://nodejs.org/api/documentation.html#documentation_stability_index)
 
 ## 2. Motivation
@@ -50,6 +64,10 @@ Rationale:
 
    ```sh
    $ sudo apt-get install poppler-utils
+   $ pdftotext -v
+   pdftotext version 20.09.0
+   Copyright 2005-2020 The Poppler Developers - http://poppler.freedesktop.org
+   Copyright 1996-2011 Glyph & Cog, LLC
    ```
 
    pdftotext is a part of poppler-utils.
@@ -65,7 +83,7 @@ Rationale:
 $ aview -v
 ```
 
-## 5. Priparing data
+## 5. Preparing data
 
 1. ```sh
    /path/to/aview$ make pdf-install
@@ -85,33 +103,54 @@ $ aview -v
 
    Converts pdf to text using `pdftotext`, and converts them to json files as caches.
 
+- #### NOTE: <!-- omit in toc -->
+
+  In accordance with the restrictions of the license terms, aview does not store or cache any MISRA C++:2008 data.
+
+  MISRA data will be retrieved from the PDF file specified in the command line option each time aview is executed.
+
 ## 6. Usage
 
 ### 6.1. `diff`
 
 #### 6.1.1. Differences in individual rules
 
-   ```sh
-   $ aview diff A18-1-3
-   ```
+#### Compare 17-10 and 19-03 <!-- omit in toc -->
 
-   or
+```sh
+$ aview diff A18-1-3
+```
 
-   ```sh
-   $ aview diff A18-1-3 -HTR
-   ```
+```sh
+$ aview diff A18-1-3 -HTR
+```
 
-   Using opt, specify which part of the rule data to compare.
+- Using opts, specify which part of the rule data to compare. \
+  more > `aview diff -h`
 
-   more > `aview diff -h`
+#### Compare specified rules/versions <!-- omit in toc -->
+
+```sh
+$ aview diff 0-1-7@2008 A0-1-2@1903 -m path/to/your/misra.pdf
+```
+
+- @ opts are:
+
+  - 1710 = AUTOSAR C++:17-10
+  - 1903 = AUTOSAR C++:19-03
+  - 2008 = MISRA C++:2008
+
 
 #### 6.1.2. Differences in all rules
 
-   ```sh
-   $ aview diff all -A
-   ```
+```sh
+$ aview diff all -A
+```
 
-   If all is specified as the ID, only the differences will be displayed, not the parts with the same content.
+If all is specified as the ID:
+
+- Compare A17-10 and A19-03.
+- Only the differences will be displayed, not the parts with the same content.
 
 ### 6.2. Write your own subcommands
 
