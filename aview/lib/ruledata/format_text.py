@@ -647,7 +647,7 @@ def _m2008_rule_parser(blocks):
         if b.startswith("//"):
             rule[0] += "\n\n" + b   # prev part
         elif b.startswith("(") and b.endswith(")"):
-            rule[2] = b             # classifier
+            rule[2] = b.lower()     # classifier
         else:
             if rule[3] == "":
                 rule[3] = b         # rule body

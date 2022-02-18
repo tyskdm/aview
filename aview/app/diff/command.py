@@ -21,6 +21,8 @@ def setup(subparsers, name, commonOptions):
                         help='type convert to. text=formatted text, or json=rule data objects.')
     parser.add_argument('-m', '--misra2008',
                         help='path to the misra2008 pdf file.')
+    parser.add_argument('-d', '--dump', action='store_true',
+                        help='Dump rules specified by ids after diff.')
 
     # DATA STRUCTURE
     # [
@@ -176,12 +178,24 @@ def run(args):
 
         diff = compare_rule(rule_a, rule_b, opts, all=True)
 
-        headline = "\ndiff: - " + ida[0]+"@"+ida[1] + " / + " + idb[0]+"@"+idb[1]
+        if args.dump:
+            print("### Diff\n")
+            print("```text")
+
+        headline = "diff: - " + ida[0]+"@"+ida[1] + " / + " + idb[0]+"@"+idb[1]
         print(headline)
-        print("-" * (len(headline) - 1))
+        print("-" * len(headline))
         print("Compare : " + ', '.join(opts["_Compare"]))
         print("Ignore  : " + ', '.join(opts["_Ignore"]))
         print('\n'.join(diff))
+
+        if args.dump:
+            print("```\n")
+            dump_rules(
+                (ida[0]+"@"+ida[1], rule_a),
+                (idb[0]+"@"+idb[1], rule_b),
+                opts, all=True
+            )
 
 
 def _set_id(ids):
@@ -390,3 +404,51 @@ def _set_opts(args):
     opts["_Ignore"] = _Ignore
 
     return opts
+
+
+def dump_rules(a, b, opts, all = False):
+    dump_rule(a, opts, all)
+    dump_rule(b, opts, all)
+
+
+def dump_rule(dumprule, opts, all = False):
+
+    name = dumprule[0]
+    rule = dumprule[1]
+
+    print("\n### " + name)
+
+    all_keys = rule.keys()
+
+    if "Section" in all_keys and opts["header"]:
+        print("\n#### Section")
+        print("\n" + "\n".join(rule["Section"]))
+
+    if "Class" in all_keys and opts["classifier"]:
+        print("\n#### Class")
+        print("\n" + "\n".join(rule["Class"]))
+
+    if "Rule" in all_keys and opts["text"]:
+        print("\n#### Rule")
+        print("\n" + rule["Rule"])
+
+    if "Note" in all_keys and opts["note"]:
+        print("\n#### Note")
+        print("\n" + "\n".join(rule["Note"]))
+
+    if "Rationale" in all_keys and opts["rationale"]:
+        print("\n#### Rationale")
+        print("\n" + "\n".join(rule["Rationale"]))
+
+    if "Exception" in all_keys and opts["exception"]:
+        print("\n#### Exception")
+        print("\n" + "\n".join(rule["Exception"]))
+
+    if "Example" in all_keys and opts["example"]:
+        print("\n#### Example")
+        print("\n" + "\n".join(rule["Example"]))
+
+    if "See also" in all_keys and opts["seealso"]:
+        print("\n#### See also")
+        print("\n" + "\n".join(rule["See also"]))
+
